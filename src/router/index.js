@@ -1,26 +1,49 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "../views/Home.vue";
-
+import NProgress from "nprogress";
 const routes = [
   {
     path: "/",
+    redirect: "/login",
     name: "Home",
-    component: Home
+    component: () => import("../views/Home.vue"),
+  },
+  // 登录
+  {
+    path: "/login",
+    name: "Login",
+    component: () => import("../views/account/Login.vue"),
+  },
+  // 注册
+  {
+    path: "/register",
+    name: "Register",
+    component: () => import("../views/account/Register.vue"),
+  },
+  // 忘记密码
+  {
+    path: "/forgetPassword",
+    name: "ForgetPassword",
+    component: () => import("../views/account/ForgetPassword.vue"),
   },
   {
-    path: "/about",
-    name: "About",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/About.vue")
-  }
+    path: "/news",
+    name: "News",
+    component: () => import("../views/News.vue"),
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
+});
+
+router.beforeEach((to, from) => {
+  NProgress.start();
+  return true; //取消跳转 explicitly return false to cancel the navigation  true的时候跳转
+});
+
+router.afterEach((to, from) => {
+  NProgress.done();
 });
 
 export default router;

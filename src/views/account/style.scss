@@ -1,0 +1,21 @@
+#account {
+  width: 100vw;
+  height: 100vh;
+  background: #282828;
+}
+.form-wrap {
+  width: 285px;
+  margin: auto;
+  padding-top: 130px;
+  label {
+    color: white;
+    font-size: 14px;
+  }
+}
+// 修改滑块样式
+.nc-container .nc_scale span{
+  height: unset;
+}
+.nc-container .nc_scale .btn_ok{
+  line-height: 32px !important;
+}
