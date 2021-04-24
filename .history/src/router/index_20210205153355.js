@@ -25,17 +25,10 @@ const routes = [
     name: "ForgetPassword",
     component: () => import("../views/account/ForgetPassword.vue"),
   },
-  //首页
-  {
-    path: "/home",
-    name: "Home",
-    component: () => import("../views/layout/Index.vue"),
-  },
-  // 信息管理
   {
     path: "/news",
     name: "News",
-    component: () => import("../views/layout/Index.vue"),
+    component: () => import("../views/News.vue"),
   },
 ];
 
