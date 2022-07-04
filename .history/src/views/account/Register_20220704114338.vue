@@ -1,27 +1,32 @@
 <template>
   <div id="account">
     <div class="form-wrap">
-      <a-form :model="form" ref="form" @finish="handleFinish">
-        <a-form-item required name="username">
+      <a-form
+        :model="formConfig.form"
+        ref="form"
+        @finish="handleFinish"
+        :rules="formConfig.rules"
+      >
+        <a-form-item name="username">
           <label>用户名</label>
           <a-input
-            v-model:value="form.username"
+            v-model:value="formConfig.form.username"
             type="text"
             autocomplete="off"
           />
         </a-form-item>
-        <a-form-item required name="pwd">
+        <a-form-item name="pwd">
           <label>密码</label>
           <a-input
-            v-model:value="form.pwd"
+            v-model:value="formConfig.form.pwd"
             type="password"
             autocomplete="off"
           />
         </a-form-item>
-        <a-form-item required name="password1">
+        <a-form-item name="password1">
           <label>确认密码</label>
           <a-input
-            v-model:value="form.password1"
+            v-model:value="formConfig.form.password1"
             type="password"
             autocomplete="off"
           />
@@ -31,14 +36,22 @@
           <a-row>
             <a-col :span="16">
               <a-input
-                v-model:value="form.code"
+                v-model:value="formConfig.form.code"
                 type="text"
                 autocomplete="off"
                 maxlength="6"
               />
             </a-col>
             <a-col :span="8">
-              <a-button type="primary" block>{{ button_text }}</a-button>
+              <a-button
+                type="primary"
+                block
+                :loading="button_loading"
+                :disabled="button_disabled"
+                @click="getCode"
+              >
+                {{ button_text }}</a-button
+              >
             </a-col>
           </a-row>
         </a-form-item>
@@ -46,16 +59,12 @@
           <Captcha></Captcha>
         </a-form-item>
         <a-form-item>
-          <a-button type="primary" html-type="submit" block @click="onSubmit">
-            重置密码
+          <a-button type="primary" html-type="submit" block @click="onSubmit()">
+            注册
           </a-button>
         </a-form-item>
         <div class="tetx-center color-white">
           <router-link to="/" class="color-white ft-12">登录</router-link>
-          |
-          <router-link to="/register" class="color-white ft-12"
-            >注册</router-link
-          >
         </div>
       </a-form>
     </div>
@@ -63,13 +72,14 @@
 </template>
 
 <script>
-import { onMounted, reactive, toRefs } from "vue";
+import { onMounted, reactive, toRefs, root } from "vue";
 import Captcha from "@/components/captcha/Captcha.vue";
 import { checkPhone, checkPass, checkCode } from "@/utils/validate.js"; //1
 // 取别名2
 import { checkPhone as phone } from "@/utils/validate.js";
 // 全部导入 *代表所有3
 import * as verification from "@/utils/validate.js";
+import { message } from "ant-design-vue";
 export default {
   name: "Register",
   components: { Captcha },
@@ -79,7 +89,6 @@ export default {
         labelCol: { span: 4 },
         wrapperCol: { span: 14 },
       },
-      button_text: "获取验证码",
       form: {
         username: "",
         pwd: "",
@@ -90,30 +99,38 @@ export default {
         username: [
           {
             validator: checkUsername,
-            trigger: "blur",
+            trigger: "change",
           },
         ],
         pwd: [
           {
             validator: checkPassword,
-            trigger: "blur",
+            trigger: "change",
           },
         ],
         password1: [
           {
             validator: checkPassword1,
-            trigger: "blur",
+            trigger: "change",
           },
         ],
         code: [
           {
             validator: checkCode,
-            trigger: "blur",
+            trigger: "change",
           },
         ],
       },
     });
+    const dataItem = reactive({
+      button_text: "获取验证码",
+      button_loading: false, //加载
+      button_disabled: false, //按钮禁用
+      sec: 60, //倒计时60秒
+      timer: null, //定时器名称
+    });
     const checkUsername = async (rule, value, callback) => {
+      console.log(">>>>>>>>>>");
       if (!value) {
         return Promise.reject("请输入用户名"); //错误的情况
       } else if (!checkPhone(value)) {
@@ -123,15 +140,12 @@ export default {
       }
     };
     const checkPassword = async (rule, value, callback) => {
-      let passwords = formConfig.form.password1;
+      // let passwords = formConfig.form.password1;
+      console.log(4444);
       if (!value) {
         return Promise.reject("请输入密码"); //错误的情况
       } else if (!checkPass(value)) {
         return Promise.reject("请输入6-20位的数字+字母"); //手机号错误的情况
-      } else if (passwords && value) {
-        if (passwords !== value) {
-          return Promise.reject("两次密码输入不一致");
-        }
       } else {
         return Promise.resolve();
       }
@@ -160,10 +174,11 @@ export default {
       }
     };
     const onSubmit = () => {
-      this.$refs.form
+      console.log(3333);
+
+      root.$refs.form
         .validate()
         .then(() => {
-          console.log(3333);
           console.log("values", this.form);
         })
         .catch((error) => {
@@ -173,12 +188,42 @@ export default {
     const handleFinish = (values) => {
       console.log(values);
     };
-    // const handleFinishFailed = (errors) => {
-    //   console.log(errors);
-    // };
+    const getCode = () => {
+      if (!formConfig.form.username) {
+        message.error("用户名不能为空");
+        return;
+      }
+      // 优先判断一下定时器是否存在，存在的话，先清除定时器，再开启定时器
+      // dataItem.timer && clearInterval(dataItem.timer);另一种写法
+      if (dataItem.timer) {
+        clearInterval(dataItem.timer);
+      }
+      dataItem.timer = setInterval(() => {
+        if (dataItem.sec == 0) {
+          dataItem.button_text = "重新发送";
+          clearInterval(dataItem.timer);
+        } else {
+          dataItem.button_text = `${dataItem.sec--}秒`;
+        }
+
+        console.log(dataItem.sec);
+      }, 1000);
+    };
     onMounted(() => {});
-    const data = toRefs(formConfig);
-    return { ...data, handleFinish, onSubmit };
+    // const form = toRefs(formConfig);
+    const data = toRefs(dataItem);
+    return {
+      formConfig,
+      onSubmit,
+      checkUsername,
+      checkPassword,
+      checkPassword1,
+      checkCode,
+      handleFinish,
+      getCode,
+      ...data,
+      // ...form,
+    };
   },
 };
 </script>

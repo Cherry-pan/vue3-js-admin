@@ -51,7 +51,7 @@
           </a-button>
         </a-form-item>
         <div class="tetx-center color-white">
-          <router-link to="/" class="color-white ft-12">登录</router-link>
+          <router-link to="/login" class="color-white ft-12">登录</router-link>
           |
           <router-link to="/register" class="color-white ft-12"
             >注册</router-link

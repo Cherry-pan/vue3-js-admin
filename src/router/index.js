@@ -1,15 +1,15 @@
 import { createRouter, createWebHistory } from "vue-router";
 import NProgress from "nprogress";
 const routes = [
-  {
-    path: "/",
-    redirect: "/login",
-    name: "Home",
-    component: () => import("../views/Home.vue"),
-  },
+  // {
+  //   path: "/",
+  //   redirect: "/login",
+  //   name: "Home",
+  //   component: () => import("../views/Home.vue"),
+  // },
   // 登录
   {
-    path: "/login",
+    path: "/",
     name: "Login",
     component: () => import("../views/account/Login.vue"),
   },
